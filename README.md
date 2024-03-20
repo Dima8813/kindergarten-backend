@@ -79,7 +79,10 @@ Nest is [MIT licensed](LICENSE).
 Docker run -> `docker-compose up`
 
 ### Install
-config -> `npm i --save @nestjs/config`
+[Config](https://docs.nestjs.com/techniques/configuration#custom-configuration-files) -> `npm i --save @nestjs/config`
+
+[Swagger](https://docs.nestjs.com/openapi/introduction) -> `npm i --save @nestjs/swagger` 
+
 
 ### Install sequelize - [Sequelize](https://docs.nestjs.com/recipes/sql-sequelize)
 `npm i --save sequelize sequelize-typescript pg`
