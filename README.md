@@ -71,3 +71,19 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+
+## My
+
+### Docker
+Docker run -> `docker-compose up`
+
+### Install
+config -> `npm i --save @nestjs/config`
+
+### Install sequelize - [Sequelize](https://docs.nestjs.com/recipes/sql-sequelize)
+`npm i --save sequelize sequelize-typescript pg`
+
+`npm i --save-dev @types/sequelize`
+
+`npm i --save @nestjs/sequelize`
