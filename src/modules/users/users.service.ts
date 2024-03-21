@@ -4,8 +4,7 @@ import * as bcrypt from 'bcrypt';
 
 import { User } from './models/user.model';
 import { CreateUserDTO } from './dto';
-import { usersData } from '../../moks';
-import { AppErrors } from '../../common/errors';
+import { AppErrors } from '../../common/consts/errors';
 
 @Injectable()
 export class UsersService {
