@@ -1,7 +1,7 @@
 export const usersData = [
   {
     "_id": "65fb385174ada775a7cc2d74",
-    "name": "Tammie",
+    "firstName": "Tammie",
     "surname": "Gonzalez",
     "roleId": 0,
     "gender": "female",
@@ -10,7 +10,7 @@ export const usersData = [
   },
   {
     "_id": "65fb3851f6f3991498ba4462",
-    "name": "Kasey",
+    "firstName": "Kasey",
     "surname": "May",
     "roleId": 1,
     "gender": "female",
@@ -19,7 +19,7 @@ export const usersData = [
   },
   {
     "_id": "65fb3851c896977ce6adcb94",
-    "name": "William",
+    "firstName": "William",
     "surname": "Bird",
     "roleId": 2,
     "gender": "male",
@@ -28,7 +28,7 @@ export const usersData = [
   },
   {
     "_id": "65fb3851abbacf7499b795e6",
-    "name": "Dyer",
+    "firstName": "Dyer",
     "surname": "Dudley",
     "roleId": 3,
     "gender": "male",
@@ -37,7 +37,7 @@ export const usersData = [
   },
   {
     "_id": "65fb38513a358c19cdb2858c",
-    "name": "Bernadine",
+    "firstName": "Bernadine",
     "surname": "Lindsay",
     "roleId": 4,
     "gender": "female",

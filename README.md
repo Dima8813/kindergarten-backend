@@ -90,3 +90,13 @@ Docker run -> `docker-compose up`
 `npm i --save-dev @types/sequelize`
 
 `npm i --save @nestjs/sequelize`
+
+
+### For Validation
+`npm i class-validator`
+
+`npm i class-transformer`
+
+### Security Hashing - [Hashing](https://docs.nestjs.com/security/encryption-and-hashing)
+`npm i bcrypt`
+`npm i -D @types/bcrypt`
