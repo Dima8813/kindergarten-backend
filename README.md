@@ -100,3 +100,7 @@ Docker run -> `docker-compose up`
 ### Security Hashing - [Hashing](https://docs.nestjs.com/security/encryption-and-hashing)
 `npm i bcrypt`
 `npm i -D @types/bcrypt`
+
+
+### JWT for auth
+JWT - `npm i --save @nestjs/jwt`
