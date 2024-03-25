@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 
 import { User } from './models/user.model';
-import { CreateUserDTO } from './dto';
+import { CreateUserDTO, UpdateUserDTO } from './dto';
 import { AppErrors } from '../../common/consts/errors';
 import { AuthUserResponse } from '../auth/response';
 
@@ -22,7 +22,7 @@ export class UsersService {
   }
 
   async createUser(dto: CreateUserDTO): Promise<CreateUserDTO> {
-    const existUser = await this.findUserByEmail(dto.email);
+    const existUser: User = await this.findUserByEmail(dto.email);
 
     if (existUser) throw new BadRequestException(AppErrors.USER_EXIST);
 
@@ -42,5 +42,21 @@ export class UsersService {
       where: { email },
       attributes: { exclude: ['password'] },
     });
+  }
+
+  async allUsers(): Promise<UpdateUserDTO[]> {
+    return await this.userRepository.findAll({
+      attributes: { exclude: ['password'] },
+    });
+  }
+
+  async updateUser(email: string, dto: UpdateUserDTO): Promise<UpdateUserDTO> {
+    await this.userRepository.update(dto, { where: { email } });
+    return dto;
+  }
+
+  async deleteUser(email: string): Promise<boolean> {
+    await this.userRepository.destroy({ where: { email } });
+    return true;
   }
 }
