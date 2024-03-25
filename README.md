@@ -104,3 +104,9 @@ Docker run -> `docker-compose up`
 
 ### JWT for auth
 JWT - `npm i --save @nestjs/jwt`
+
+
+### Jwt strategy, Guards
+`npm i --save @nestjs/passport passport passport-jwt`
+
+`npm i --save-dev @types/passport-jwt`
