@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from './models/user.model';
 import { CreateUserDTO } from './dto';
 import { AppErrors } from '../../common/consts/errors';
+import { AuthUserResponse } from '../auth/response';
 
 @Injectable()
 export class UsersService {
@@ -34,5 +35,12 @@ export class UsersService {
     });
 
     return dto;
+  }
+
+  async publicUser(email: string): Promise<AuthUserResponse> {
+    return this.userRepository.findOne({
+      where: { email },
+      attributes: { exclude: ['password'] },
+    });
   }
 }
