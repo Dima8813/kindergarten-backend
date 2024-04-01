@@ -11,6 +11,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configurations from '../../configurations';
 
+import { WatchListModule } from '../watch-list/watch-list.module';
+import { WatchList } from '../watch-list/models/watch-list.model';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configurations] }),
@@ -26,12 +29,13 @@ import configurations from '../../configurations';
         database: configService.get('db_name'),
         synchronize: true,
         autoLoadModels: true,
-        models: [User],
+        models: [User, WatchList],
       }),
     }),
     UsersModule,
     AuthModule,
     TokenModule,
+    WatchListModule,
   ],
   controllers: [AppController],
   providers: [AppService],
