@@ -15,27 +15,44 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
   ) {}
+
   async registerUsers(dto: CreateUserDTO): Promise<CreateUserDTO> {
-    const existUser: User = await this.usersService.findUserByEmail(dto.email);
-
-    if (existUser) throw new BadRequestException(AppErrors.USER_EXIST);
-
-    return this.usersService.createUser(dto);
+    try {
+      const existUser: User = await this.usersService.findUserByEmail(
+        dto.email,
+      );
+      if (existUser) throw new BadRequestException(AppErrors.USER_EXIST);
+      return this.usersService.createUser(dto);
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 
-  async loginUsers(dto: UserLoginDTO): Promise<any> {
-    const existUser: User = await this.usersService.findUserByEmail(dto.email);
-    if (!existUser) throw new BadRequestException(AppErrors.USER_NOT_EXIST);
-    const validatePassword: boolean = await bcrypt.compare(
-      dto.password,
-      existUser.password,
-    );
-    if (!validatePassword) throw new BadRequestException(AppErrors.WRONG_DATA);
-    const user: AuthUserResponse = await this.usersService.publicUser(
-      dto.email,
-    );
-    const token: string = await this.tokenService.generateJwtToken(user);
+  async loginUsers(dto: UserLoginDTO): Promise<AuthUserResponse> {
+    try {
+      const existUser: User = await this.usersService.findUserByEmail(
+        dto.email,
+      );
 
-    return { user, token };
+      if (!existUser) {
+        throw new BadRequestException(AppErrors.USER_NOT_EXIST);
+      }
+
+      const validatePassword: boolean = await bcrypt.compare(
+        dto.password,
+        existUser.password,
+      );
+
+      if (!validatePassword) {
+        throw new BadRequestException(AppErrors.WRONG_DATA);
+      }
+
+      const user = await this.usersService.publicUser(dto.email);
+      const token: string = await this.tokenService.generateJwtToken(user);
+
+      return { user, token };
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 }
