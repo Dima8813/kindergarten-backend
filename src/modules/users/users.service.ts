@@ -6,6 +6,7 @@ import { User } from './models/user.model';
 import { CreateUserDTO, UpdateUserDTO } from './dto';
 import { AppErrors } from '../../common/consts/errors';
 import { AuthUserResponse } from '../auth/response';
+import { WatchList } from '../watch-list/models/watch-list.model';
 
 @Injectable()
 export class UsersService {
@@ -38,9 +39,13 @@ export class UsersService {
   }
 
   async publicUser(email: string): Promise<AuthUserResponse> {
-    return this.userRepository.findOne({
+    return await this.userRepository.findOne({
       where: { email },
       attributes: { exclude: ['password'] },
+      include: {
+        model: WatchList,
+        required: false,
+      },
     });
   }
 
