@@ -38,7 +38,7 @@ export class UsersService {
     return dto;
   }
 
-  async publicUser(email: string): Promise<AuthUserResponse> {
+  async publicUser(email: string): Promise<any> {
     return await this.userRepository.findOne({
       where: { email },
       attributes: { exclude: ['password'] },
