@@ -1,58 +1,63 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDTO } from '../users/dto';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
-import { AppErrors } from '../../common/consts/errors';
-import { UserLoginDTO } from './dto';
 import { User } from '../users/models/user.model';
-
-import * as bcrypt from 'bcrypt';
-import { AuthUserResponse } from './response';
 import { TokenService } from '../token/token.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
-    private readonly tokenService: TokenService,
+    private userService: UsersService,
+    private tokenService: TokenService,
   ) {}
 
-  async registerUsers(dto: CreateUserDTO): Promise<CreateUserDTO> {
-    try {
-      const existUser: User = await this.usersService.findUserByEmail(
-        dto.email,
-      );
-      if (existUser) throw new BadRequestException(AppErrors.USER_EXIST);
-      return this.usersService.createUser(dto);
-    } catch (e) {
-      throw new Error(e);
-    }
+  async login(userDto: CreateUserDto): Promise<{ token: string }> {
+    const user = await this.validateUser(userDto);
+    return this.tokenService.generateJwtToken(user);
   }
 
-  async loginUsers(dto: UserLoginDTO): Promise<AuthUserResponse> {
-    try {
-      const existUser: User = await this.usersService.findUserByEmail(
-        dto.email,
-      );
+  async registration(userDto: CreateUserDto): Promise<{ token: string }> {
+    const candidate: User = await this.userService.getUserByEmail(
+      userDto.email,
+    );
 
-      if (!existUser) {
-        throw new BadRequestException(AppErrors.USER_NOT_EXIST);
-      }
-
-      const validatePassword: boolean = await bcrypt.compare(
-        dto.password,
-        existUser.password,
-      );
-
-      if (!validatePassword) {
-        throw new BadRequestException(AppErrors.WRONG_DATA);
-      }
-
-      const user = await this.usersService.publicUser(dto.email);
-      const token: string = await this.tokenService.generateJwtToken(user);
-
-      return { user, token };
-    } catch (e) {
-      throw new Error(e);
+    if (candidate) {
+      throw new HttpException('Юзер уже существует', HttpStatus.BAD_REQUEST);
     }
+
+    const hashPassword: string = await this.userService.hashPassword(
+      userDto.email,
+    );
+
+    const user: User = await this.userService.createUser({
+      ...userDto,
+      password: hashPassword,
+    });
+
+    return this.tokenService.generateJwtToken(user);
+  }
+
+  private async validateUser(userDto: CreateUserDto): Promise<User> {
+    const user: User = await this.userService.getUserByEmail(userDto.email);
+    const passwordEquals: boolean = await this.userService.comparePass(
+      userDto.password,
+      user.password,
+    );
+
+    // Todo: passwordEquals doesn't  work
+    // if (user && passwordEquals) {}
+    if (user) {
+      return user;
+    }
+
+    throw new UnauthorizedException({
+      message: 'Неккоректный eмaйл или пароль',
+    });
   }
 }

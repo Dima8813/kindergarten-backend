@@ -1,26 +1,20 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-
+import { ApiTags } from '@nestjs/swagger';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
-import { AuthUserResponse } from './response';
-import { CreateUserDTO } from '../users/dto';
-import { UserLoginDTO } from './dto';
 
+@ApiTags('Авторизация')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-  @ApiTags('API')
-  @ApiResponse({ status: 201, type: CreateUserDTO })
-  @Post('register')
-  register(@Body() dto: CreateUserDTO): Promise<CreateUserDTO> {
-    return this.authService.registerUsers(dto);
+  @Post('/login')
+  login(@Body() userDto: CreateUserDto): Promise<{ token: string }> {
+    return this.authService.login(userDto);
   }
 
-  @ApiTags('API')
-  @ApiResponse({ status: 200, type: AuthUserResponse })
-  @Post('login')
-  login(@Body() dto: UserLoginDTO): Promise<AuthUserResponse> {
-    return this.authService.loginUsers(dto);
+  @Post('/registration')
+  registration(@Body() userDto: CreateUserDto): Promise<{ token: string }> {
+    return this.authService.registration(userDto);
   }
 }

@@ -1,58 +1,50 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
-
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
-import { CreateUserDTO, UpdateUserDTO } from './dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../guards/jwt-guard';
+import { User } from './models/user.model';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../auth/roles-auth.decorator';
+import { RoleGuards } from '../../guards/role.guards';
+import { AddRoleDto } from './dto/add-role.dto';
+import { BanUserDto } from './dto/ban-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
-  // @ApiTags('Users')
-  // @ApiResponse({ status: 201, type: CreateUserDTO })
-  // @Post('create-user')
-  // createUsers(@Body() dto: CreateUserDTO): Promise<CreateUserDTO> {
-  //   return this.userService.createUser(dto);
-  // }
+  constructor(private userService: UsersService) {}
 
   @ApiTags('Users')
-  @ApiResponse({ status: 200, type: UpdateUserDTO })
-  @UseGuards(JwtAuthGuard)
+  @Post()
+  @ApiResponse({ status: 200, type: User })
+  create(@Body() userDto: CreateUserDto): Promise<User> {
+    return this.userService.createUser(userDto);
+  }
+
+  @ApiTags('Users')
+  @ApiResponse({ status: 200, type: [User] })
+  @Roles('Administrator')
+  @UseGuards(RoleGuards)
   @Get()
-  findAll(): Promise<UpdateUserDTO[]> {
-    return this.userService.allUsers();
+  getAll(): Promise<User[]> {
+    return this.userService.getAllUsers();
   }
 
   @ApiTags('Users')
-  @ApiResponse({ status: 200, type: UpdateUserDTO })
-  @UseGuards(JwtAuthGuard)
-  @Patch('update-user')
-  updateUsers(
-    @Body() updateDto: UpdateUserDTO,
-    @Req() request,
-  ): Promise<UpdateUserDTO> {
-    const user = request.user;
-    return this.userService.updateUser(user.email, updateDto);
+  @ApiOperation({ summary: 'Выдать роль' })
+  @ApiResponse({ status: 200 })
+  @Roles('Administrator')
+  @UseGuards(RoleGuards)
+  @Post('/role')
+  addRole(@Body() dto: AddRoleDto): Promise<User> {
+    return this.userService.addRole(dto);
   }
 
   @ApiTags('Users')
-  @ApiResponse({
-    status: 200,
-    description: 'The user has been deleted.',
-  })
-  @UseGuards(JwtAuthGuard)
-  @Delete('delete-user')
-  deleteUsers(@Req() request): Promise<boolean> {
-    const user = request.user;
-    return this.userService.deleteUser(user.email);
+  @ApiOperation({ summary: 'Забанить пользователя' })
+  @ApiResponse({ status: 200 })
+  @Roles('Administrator')
+  @UseGuards(RoleGuards)
+  @Post('/ban')
+  ban(@Body() dto: BanUserDto): Promise<User> {
+    return this.userService.ban(dto);
   }
 }

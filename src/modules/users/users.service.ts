@@ -1,17 +1,76 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import * as bcrypt from 'bcrypt';
 
+import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './models/user.model';
-import { CreateUserDTO, UpdateUserDTO } from './dto';
-import { AppErrors } from '../../common/consts/errors';
-import { WatchList } from '../watch-list/models/watch-list.model';
+import { RoleService } from '../role/role.service';
+import { Role } from '../role/models/role.model';
+import * as bcrypt from 'bcrypt';
+import { AddRoleDto } from './dto/add-role.dto';
+import { BanUserDto } from './dto/ban-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User) private readonly userRepository: typeof User,
+    private readonly roleService: RoleService,
   ) {}
+
+  async createUser(dto: CreateUserDto): Promise<User> {
+    const user: User = await this.userRepository.create(dto);
+    const role: Role = dto.role
+      ? await this.roleService.getRoleByValue(dto.role)
+      : await this.roleService.getRoleByValue('User');
+
+    await user.$set('roles', [role.id]);
+    user.roles = [role];
+
+    return user;
+  }
+
+  async getAllUsers(): Promise<any> {
+    const users: User[] = await this.userRepository.findAll({
+      include: { all: true },
+    });
+    return users;
+  }
+
+  async addRole(dto: AddRoleDto): Promise<User> {
+    const user: User = await this.userRepository.findByPk(dto.userId);
+    const role: Role = await this.roleService.getRoleByValue(dto.value);
+
+    if (user && role) {
+      await user.$add('role', role.id);
+      return user;
+    }
+
+    throw new HttpException(
+      'Пользователь или роль не найдены',
+      HttpStatus.NOT_FOUND,
+    );
+  }
+
+  async ban(dto: BanUserDto): Promise<User> {
+    const user: User = await this.userRepository.findByPk(dto.userId);
+    if (!user) {
+      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
+    }
+
+    user.banned = true;
+    user.bannedReason = dto.banReason;
+
+    await user.save();
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
+    const user: User = await this.userRepository.findOne({
+      where: { email },
+      include: { all: true },
+    });
+
+    return user;
+  }
 
   async hashPassword(password: string): Promise<string> {
     try {
@@ -21,74 +80,7 @@ export class UsersService {
     }
   }
 
-  async findUserByEmail(email: string): Promise<User> {
-    try {
-      return this.userRepository.findOne({ where: { email: email } });
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async createUser(dto: CreateUserDTO): Promise<CreateUserDTO> {
-    try {
-      const existUser: User = await this.findUserByEmail(dto.email);
-
-      if (existUser) throw new BadRequestException(AppErrors.USER_EXIST);
-
-      dto.password = await this.hashPassword(dto.password);
-      await this.userRepository.create({
-        firstName: dto.firstName,
-        surname: dto.surname,
-        email: dto.email,
-        password: dto.password,
-      });
-
-      return dto;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async publicUser(email: string): Promise<User> {
-    try {
-      return await this.userRepository.findOne({
-        where: { email },
-        attributes: { exclude: ['password'] },
-        include: {
-          model: WatchList,
-          required: false,
-        },
-      });
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async allUsers(): Promise<UpdateUserDTO[]> {
-    try {
-      return await this.userRepository.findAll({
-        attributes: { exclude: ['password'] },
-      });
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async updateUser(email: string, dto: UpdateUserDTO): Promise<UpdateUserDTO> {
-    try {
-      await this.userRepository.update(dto, { where: { email } });
-      return dto;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  async deleteUser(email: string): Promise<boolean> {
-    try {
-      await this.userRepository.destroy({ where: { email } });
-      return true;
-    } catch (e) {
-      throw new Error(e);
-    }
+  async comparePass(pass: string, passOld: string) {
+    return bcrypt.compare(passOld, pass);
   }
 }
