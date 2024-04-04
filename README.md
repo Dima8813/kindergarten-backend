@@ -79,7 +79,10 @@ Nest is [MIT licensed](LICENSE).
 Docker run -> `docker-compose up`
 
 ### Install
-config -> `npm i --save @nestjs/config`
+[Config](https://docs.nestjs.com/techniques/configuration#custom-configuration-files) -> `npm i --save @nestjs/config`
+
+[Swagger](https://docs.nestjs.com/openapi/introduction) -> `npm i --save @nestjs/swagger` 
+
 
 ### Install sequelize - [Sequelize](https://docs.nestjs.com/recipes/sql-sequelize)
 `npm i --save sequelize sequelize-typescript pg`
@@ -87,3 +90,23 @@ config -> `npm i --save @nestjs/config`
 `npm i --save-dev @types/sequelize`
 
 `npm i --save @nestjs/sequelize`
+
+
+### For Validation
+`npm i class-validator`
+
+`npm i class-transformer`
+
+### Security Hashing - [Hashing](https://docs.nestjs.com/security/encryption-and-hashing)
+`npm i bcrypt`
+`npm i -D @types/bcrypt`
+
+
+### JWT for auth
+JWT - `npm i --save @nestjs/jwt`
+
+
+### Jwt strategy, Guards
+`npm i --save @nestjs/passport passport passport-jwt`
+
+`npm i --save-dev @types/passport-jwt`
