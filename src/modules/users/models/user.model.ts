@@ -1,20 +1,84 @@
-import { Column, HasMany, Model, Table } from 'sequelize-typescript';
-import { WatchList } from '../../watch-list/models/watch-list.model';
+import {
+  BelongsToMany,
+  Column,
+  DataType,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { ApiProperty } from '@nestjs/swagger';
 
-@Table
-export class User extends Model {
-  @Column
+import { Role } from '../../role/models/role.model';
+import { UserRoles } from '../../role/models/user-roles.model';
+
+@Table({ tableName: 'users' })
+export class User extends Model<User> {
+  @ApiProperty()
+  @Column({
+    type: DataType.INTEGER,
+    unique: true,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number;
+
+  @ApiProperty()
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   firstName: string;
 
-  @Column
-  surname: string;
+  @ApiProperty()
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  lastName: string;
 
-  @Column
+  @ApiProperty()
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  gender: string;
+
+  @ApiProperty()
+  @Column({
+    type: DataType.STRING,
+    unique: true,
+    allowNull: false,
+  })
   email: string;
 
-  @Column
+  @ApiProperty()
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  phone: string;
+
+  @ApiProperty()
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   password: string;
 
-  @HasMany(() => WatchList)
-  watchList: WatchList[];
+  @ApiProperty()
+  @Column({
+    type: DataType.BOOLEAN,
+    defaultValue: false,
+  })
+  banned: boolean;
+
+  @ApiProperty()
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  bannedReason: string;
+
+  @ApiProperty()
+  @BelongsToMany(() => Role, () => UserRoles)
+  roles: Role[];
 }
