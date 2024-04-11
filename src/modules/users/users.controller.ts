@@ -3,45 +3,69 @@ import {
   Controller,
   Delete,
   Get,
-  Patch,
-  Req,
-  Res,
+  Param,
+  Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { Roles } from '../auth/roles-auth.decorator';
 import { UsersService } from './users.service';
-import { CreateUserDTO, UpdateUserDTO } from './dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../guards/jwt-guard';
+import { User } from './models/user.model';
+import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { BanUserDto } from './dto/ban-user.dto';
+import { RoleEnum } from '@core/enums';
+import { AddRoleDto } from './dto/add-role.dto';
+import { RolesGuard } from '../../common/guards';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
-  // @ApiTags('Users')
-  // @ApiResponse({ status: 201, type: CreateUserDTO })
-  // @Post('create-user')
-  // createUsers(@Body() dto: CreateUserDTO): Promise<CreateUserDTO> {
-  //   return this.userService.createUser(dto);
-  // }
 
   @ApiTags('Users')
-  @ApiResponse({ status: 200, type: UpdateUserDTO })
-  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 200, type: [User] })
   @Get()
-  findAll(): Promise<UpdateUserDTO[]> {
-    return this.userService.allUsers();
+  getAll(@Query('email') email): Promise<User[] | User> {
+    if (email) {
+      return this.userService.findUsersByEmail(email);
+    }
+    return this.userService.getAllUsers();
   }
 
   @ApiTags('Users')
-  @ApiResponse({ status: 200, type: UpdateUserDTO })
-  @UseGuards(JwtAuthGuard)
-  @Patch('update-user')
-  updateUsers(
-    @Body() updateDto: UpdateUserDTO,
-    @Req() request,
-  ): Promise<UpdateUserDTO> {
-    const user = request.user;
-    return this.userService.updateUser(user.email, updateDto);
+  @ApiOperation({ summary: 'Get user by email' })
+  @ApiResponse({ status: 200, type: User })
+  @Get('/getUserByEmail')
+  getUserByEmail(@Body() dto: { email: string }): Promise<User> {
+    return this.userService.findUserByEmail(dto.email);
+  }
+
+  @ApiTags('Users')
+  @ApiResponse({ status: 201, type: User })
+  @Post()
+  create(@Body() dto: CreateUserDto): Promise<User> {
+    return this.userService.createUser(dto);
+  }
+
+  @ApiTags('Users')
+  @ApiOperation({ summary: 'Add role' })
+  @ApiResponse({ status: 200 })
+  @Roles(RoleEnum.ADMIN)
+  @UseGuards(RolesGuard)
+  @Post('/role')
+  addRole(@Body() dto: AddRoleDto): Promise<User> {
+    return this.userService.addRole(dto);
+  }
+
+  @ApiTags('Users')
+  @ApiOperation({ summary: 'Ban a user' })
+  @ApiResponse({ status: 200 })
+  @Roles(RoleEnum.ADMIN)
+  @UseGuards(RolesGuard)
+  @Post('/ban')
+  ban(@Body() banUserDto: BanUserDto): Promise<User> {
+    return this.userService.ban(banUserDto);
   }
 
   @ApiTags('Users')
@@ -49,10 +73,10 @@ export class UsersController {
     status: 200,
     description: 'The user has been deleted.',
   })
-  @UseGuards(JwtAuthGuard)
-  @Delete('delete-user')
-  deleteUsers(@Req() request): Promise<boolean> {
-    const user = request.user;
-    return this.userService.deleteUser(user.email);
+  @Roles(RoleEnum.ADMIN)
+  @UseGuards(RolesGuard)
+  @Delete('/:id')
+  delete(@Param('id') id: string): Promise<boolean> {
+    return this.userService.deleteUser(+id);
   }
 }
