@@ -26,10 +26,4 @@ export class AuthController {
   ): Promise<{ user: User; token: string }> {
     return this.authService.login(loginUserDto);
   }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('test')
-  test() {
-    return true;
-  }
 }

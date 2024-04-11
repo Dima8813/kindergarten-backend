@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -24,10 +25,11 @@ export class UsersController {
 
   @ApiTags('Users')
   @ApiResponse({ status: 200, type: [User] })
-  @Roles(RoleEnum.ADMIN, RoleEnum.TEACHER)
-  @UseGuards(RolesGuard)
   @Get()
-  getAll(): Promise<User[]> {
+  getAll(@Query('email') email): Promise<User[] | User> {
+    if (email) {
+      return this.userService.findUsersByEmail(email);
+    }
     return this.userService.getAllUsers();
   }
 

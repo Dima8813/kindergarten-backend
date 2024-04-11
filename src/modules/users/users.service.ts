@@ -51,6 +51,14 @@ export class UsersService {
     return user;
   }
 
+  async findUsersByEmail(email: string): Promise<User[]> {
+    const user: User[] = await this.userRepository.findAll({
+      where: { email: email },
+    });
+
+    return user;
+  }
+
   async deleteUser(id: number): Promise<boolean> {
     try {
       await this.userRepository.destroy({ where: { id } });
